@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyMusicAppAPI.Data;
+using MyMusicAppAPI.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyMusicAppAPI.Controllers
@@ -11,7 +13,7 @@ namespace MyMusicAppAPI.Controllers
     [ApiController]
     public class SongController : ControllerBase
     {
-
+         
         
         private readonly DataContext _context;
         public SongController(DataContext context)
@@ -29,15 +31,31 @@ namespace MyMusicAppAPI.Controllers
         public async Task<ActionResult<Song>> Get(int id)
         {
             var song = await _context.Songs.FindAsync(id);
-            if (song == null) return BadRequest("Song not found.");
+            if (song == null) 
+                return BadRequest("Song not found.");
+
             return Ok(song);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<Song>> GetSongsForUser(int userId)
+        {
+            var songs = _context.Songs.Where(req => req.UserId == userId);
+            if (songs == null)
+                return BadRequest("Users song list is empty");
+
+            return Ok(songs);
         }
 
         [HttpPost]
         public async Task<ActionResult<List<Song>>> AddSong(Song song)
         {
+            if (song.Rating > 5 || song.Rating < 1) 
+                return BadRequest("Rating must be in range 1-5");
+
             _context.Songs.Add(song);
             await _context.SaveChangesAsync();
+
             return Ok(await _context.Songs.ToListAsync());
         }
 
@@ -55,6 +73,7 @@ namespace MyMusicAppAPI.Controllers
             dbSong.EnteredIntoApp = newSong.EnteredIntoApp;
             dbSong.LastEditedInApp = newSong.LastEditedInApp;
             dbSong.CategoryId = newSong.CategoryId;
+            dbSong.UserId = newSong.UserId;
 
             await _context.SaveChangesAsync();
 
@@ -65,9 +84,12 @@ namespace MyMusicAppAPI.Controllers
         public async Task<ActionResult<List<Song>>> Delete(int id)
         {
             var dbSong = await _context.Songs.FindAsync(id);
-            if (dbSong == null) return BadRequest("Song not found.");
+            if (dbSong == null) 
+                return BadRequest("Song not found.");
+
             _context.Songs.Remove(dbSong);
             await _context.SaveChangesAsync();
+
             return Ok(await _context.Songs.ToListAsync());
         }
     }
