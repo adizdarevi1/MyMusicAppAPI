@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './home.css';
-import { FaAngleLeft, FaAngleRight, FaEdit, FaRegHeart, FaTrashAlt } from 'react-icons/fa';
+import { FaAngleLeft, FaAngleRight, FaHeart, FaRegHeart, FaTrashAlt } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
-import { ModalBody } from 'react-bootstrap';
+import InfoPopup from './components/InfoPupup';
 //<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" integrity="sha256-3sPp8BkKUE7QyPSl6VfBByBroQbKxKG7tsusY2mhbVY=" crossorigin="anonymous" />
 
 const pjesme = [
@@ -10,7 +10,7 @@ const pjesme = [
         id: 1,
         title: "Pjesma1",
         artist: "Pjevac1",
-        favourite: "true",
+        favourite: <FaHeart />,
         added: "20.6.2022.",
         category: "Pop"
     },
@@ -18,7 +18,7 @@ const pjesme = [
         id: 4,
         title: "Pjesma4",
         artist: "Pjevac4",
-        favourite: "true",
+        favourite: <FaRegHeart />,
         added: "20.6.2022.",
         category: "Pop"
     },
@@ -26,7 +26,7 @@ const pjesme = [
         id: 3,
         title: "Pjesma2",
         artist: "Pjevac2",
-        favourite: "true",
+        favourite: <FaHeart />,
         added: "20.6.2022.",
         category: "Pop"
     },
@@ -34,7 +34,7 @@ const pjesme = [
         id: 2,
         title: "Pjesma3",
         artist: "Pjevac3",
-        favourite: "true",
+        favourite: <FaHeart />,
         added: "20.6.2022.",
         category: "Pop"
     },
@@ -45,7 +45,7 @@ const Home = () => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
+    const [buttonPopup, setButtonPopup] = useState(false);
 
 
 
@@ -116,32 +116,35 @@ const Home = () => {
                         </form>
 
                         <div class="filter-result">
-                            <p class="mb-30 ff-montserrat">Number of songs in app : 89</p>
+                            <p class="mb-30 ff-montserrat">Number of songs in app : {pjesme.length}</p>
                             <table>
                                 <thead>
-                                    <tr>
+                                    <tr className='no-hover'>
                                         <th class="filterId">#</th>
                                         <th class="filterTitle">Title</th>
                                         <th class="filterArtist">Artist</th>
                                         <th class="filterFav"><FaRegHeart /></th>
                                         <th class="filterAdded">Added</th>
                                         <th class="filterCat">Category</th>
+                                        <th class="filterDelete"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {pjesme.map((item) => (
-                                        <tr key={item.id}>
+                                        <tr key={item.id} onClick={() => setButtonPopup(true)}>
                                             {Object.values(item).map((val) => (
                                                 <td>{val}</td>
                                             ))}
+                                            <td><FaTrashAlt /></td>
                                         </tr>
                                     ))}
                                 </tbody>
+                                <InfoPopup trigger={buttonPopup} setTrigger={setButtonPopup}></InfoPopup>
                             </table>
                         </div>
                     </div>
 
-                    <nav aria-label="Page navigation">
+                    <nav aria-label="Page navigation" class="page-nav">
                         <ul class="pagination pagination-reset justify-content-center">
                             <li class="page-item disabled">
                                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
@@ -163,19 +166,7 @@ const Home = () => {
                 </div>
             </div>
 
-        </div>
-    );
-}
-
-function AddSongsToList(i) {
-    return (<tr>
-        <td>{pjesme[i].id}</td >
-        <td>{pjesme[i].title}</td>
-        <td>{pjesme[i].artist}</td>
-        <td>{pjesme[i].favourite}</td>
-        <td>{pjesme[i].added}</td>
-        <td>{pjesme[i].category}</td>
-    </tr >
+        </div >
     );
 }
 

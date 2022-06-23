@@ -9,9 +9,17 @@ body {
 h3 {
     margin-top: 20px;
     font-size: 50px;
-    background: repeating-radial-gradient(circle closest-corner at 100px 100px, #46ccee, #4e63d7 10%, #46ccee 20%);
+    background: linear-gradient(to right bottom, #4048bf, #409fbf);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.page-nav {
+    z-index: 10;
+}
+
+.career-form {
+    background: linear-gradient(to right bottom, #4048bf, #409fbf);
 }
 
 p {
@@ -93,6 +101,14 @@ p {
 
 table {
     width: 100%;
+}
+
+table tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+table tr.no-hover:hover {
+    background-color: rgba(255, 255, 255, 0);
 }
 
 th {
