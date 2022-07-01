@@ -27,7 +27,7 @@ public class Foo
 		reviewsRepository.Sort();
 		
 		// now let's get into a loop while we take substrings of a word until we get the whole word
-		for(int i = 2; i < userInput.Length; i++){
+		for(int i = 2; i <= userInput.Length; i++){
 			// let's filter our dictionary to words starting with substring and add top 3 to the list of string lists
 			returnable.Add(new List<string>(reviewsRepository.Where(x => x.StartsWith(userInput.Substring(0,i))).Take(3)));
 		}
