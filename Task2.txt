@@ -1,0 +1,61 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+public class Foo
+{
+    /*
+     * Complete the 'SearchSuggestions' function below.
+     *
+     * The function is expected to return a list of string lists (2D_STRING_ARRAY).
+     * The function accepts following parameters:
+     * 	1. List (STRING_ARRAY) - reviewsRepository
+     * 	2. String - userInput
+     */
+
+	public static List<List<string>> SearchSuggestions(List<string>reviewsRepository, string userInput)
+    {
+		// let's create an empty list of string lists to return
+		var returnable = new List<List<string>>();
+		
+		// userInput must be more than two letters
+		if(userInput.Length < 2)
+			return returnable;
+		
+		// firstly let's sort dictionary, it is more efficient to sort it once
+		reviewsRepository.Sort();
+		
+		// now let's take first two letters from input
+		string word = userInput.Substring(0,2);
+		
+		// now let's get into a loop while we take substrings of a word until we get the whole word
+		for(int i = 2; i < userInput.Length; i++){
+			// let's filter our dictionary to words starting with substring and add top 3 to the list of string lists
+			returnable.Add(new List<string>(reviewsRepository.Where(x => x.StartsWith(userInput.Substring(0,i))).Take(3)));
+		}
+		return returnable;
+    }
+}
+
+public class Solution
+{
+    public static void Main(string[] args)
+    {
+        int reviewsRepositoryCount = Convert.ToInt32(Console.ReadLine().Trim());
+
+        List<string> reviewsRepository = new List<string>();
+
+        for (int i = 0; i < reviewsRepositoryCount; i++)
+        {
+            string reviewsRepositoryItem = Console.ReadLine();
+            reviewsRepository.Add(reviewsRepositoryItem);
+        }
+
+        string userInput = Console.ReadLine();
+
+        List<List<string>> foo = Foo.SearchSuggestions(reviewsRepository, userInput);
+
+        Console.WriteLine(String.Join("\n", foo.Select(x => String.Join(" ", x))));
+    }
+}
