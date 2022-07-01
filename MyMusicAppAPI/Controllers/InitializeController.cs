@@ -58,7 +58,7 @@ namespace MyMusicAppAPI.Controllers
         public async Task<ActionResult<List<Song>>> CreateFirstDataSongs()
         {
             if (!_context.Songs.Any())
-            {
+            { 
                 var categories = await _context.Categories.ToListAsync();
                 var users = await _context.Users.ToListAsync();
 
