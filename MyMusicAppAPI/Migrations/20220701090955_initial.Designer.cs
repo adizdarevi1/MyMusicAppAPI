@@ -9,8 +9,8 @@ using MyMusicAppAPI.Data;
 namespace MyMusicAppAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220622105502_CreateInitial")]
-    partial class CreateInitial
+    [Migration("20220701090955_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -87,9 +87,13 @@ namespace MyMusicAppAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique()
+                        .HasFilter("[UserName] IS NOT NULL");
 
                     b.ToTable("Users");
                 });

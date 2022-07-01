@@ -40,6 +40,15 @@ namespace MyMusicAppAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyMusicAppAPI", Version = "v1" });
             });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "MyAllowSpecificOrigins",
+                                  policy =>
+                                  {
+                                      policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("Content-Disposition", "WWW-Authenticate");
+                                  });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +66,8 @@ namespace MyMusicAppAPI
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors("MyAllowSpecificOrigins");
 
             app.UseEndpoints(endpoints =>
             {

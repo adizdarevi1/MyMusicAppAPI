@@ -40,11 +40,28 @@ namespace MyMusicAppAPI.Controllers
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<Song>> GetSongsForUser(int userId)
         {
-            var songs = _context.Songs.Where(req => req.UserId == userId);
+            var songs = await _context.Songs.Where(req => req.UserId == userId).ToListAsync();
             if (songs == null)
                 return BadRequest("Users song list is empty");
 
-            return Ok(songs);
+            var cat = await _context.Categories.ToListAsync();
+
+            var songsDto = new List<SongDto>();
+            foreach(var song in songs)
+            {
+
+                songsDto.Add(new SongDto(
+                    song.Id,
+                    song.Name,
+                    song.Artist,
+                    song.Rating,
+                    song.IsFavourite,
+                    song.LastEditedInApp,
+                    cat.First(x => x.Id == song.CategoryId).CategoryName
+                    ));
+            }
+
+            return Ok(songsDto);
         }
 
         [HttpPost]
@@ -64,6 +81,9 @@ namespace MyMusicAppAPI.Controllers
         {
             var dbSong = await _context.Songs.FindAsync(newSong.Id);
             if (dbSong == null) return BadRequest("Song not found.");
+
+            if(newSong.Rating > 5 || newSong.Rating < 1)
+                return BadRequest("Rating must be in range 1-5");
 
             dbSong.Name = newSong.Name;
             dbSong.Artist = newSong.Artist;

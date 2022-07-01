@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace MyMusicAppAPI.Models
 {
+    [Index(nameof(UserName), IsUnique = true)]
     public class User
     {
         public User(string userName, string password)

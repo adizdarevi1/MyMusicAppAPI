@@ -1,172 +1,367 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
+import { useTable, useSortBy, usePagination } from 'react-table'
 import './home.css';
-import { FaAngleLeft, FaAngleRight, FaHeart, FaRegHeart, FaTrashAlt } from 'react-icons/fa';
-import { useState, useEffect } from 'react';
+import { FaAngleLeft, FaAngleRight, FaArrowDown, FaArrowUp, FaFilter, FaHeart, FaMicrophoneAlt, FaMusic, FaPlus, FaRegHeart, FaSignOutAlt, FaTrashAlt } from 'react-icons/fa';
 import InfoPopup from './components/InfoPupup';
-//<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" integrity="sha256-3sPp8BkKUE7QyPSl6VfBByBroQbKxKG7tsusY2mhbVY=" crossorigin="anonymous" />
+import { useNavigate, useLocation } from 'react-router-dom';
+import Box from '@mui/material/Box';
 
-const pjesme = [
-    {
-        id: 1,
-        title: "Pjesma1",
-        artist: "Pjevac1",
-        favourite: <FaHeart />,
-        added: "20.6.2022.",
-        category: "Pop"
-    },
-    {
-        id: 4,
-        title: "Pjesma4",
-        artist: "Pjevac4",
-        favourite: <FaRegHeart />,
-        added: "20.6.2022.",
-        category: "Pop"
-    },
-    {
-        id: 3,
-        title: "Pjesma2",
-        artist: "Pjevac2",
-        favourite: <FaHeart />,
-        added: "20.6.2022.",
-        category: "Pop"
-    },
-    {
-        id: 2,
-        title: "Pjesma3",
-        artist: "Pjevac3",
-        favourite: <FaHeart />,
-        added: "20.6.2022.",
-        category: "Pop"
-    },
-];
+
+
+function Table({ columns, data }) {
+    const [openInfo, setOpenInfo] = useState(false);
+    const [songId, setSongId] = useState([]);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        prepareRow,
+        page,
+        canPreviousPage,
+        canNextPage,
+        nextPage,
+        previousPage,
+        setPageSize,
+        state: { pageIndex, pageSize },
+    } = useTable(
+        {
+            columns,
+            data,
+            initialState: { pageIndex: 0, pageSize: 5 },
+        },
+        useSortBy,
+        usePagination
+    )
+
+    function handleFilterButtonClickRT() {
+        var filterDiv = document.getElementById("hiddenFilterDivRT")
+        if (filterDiv.style.display === 'flex')
+            filterDiv.style.display = 'none'
+        else
+            filterDiv.style.display = 'flex'
+    }
+
+    function handleFilterButtonClick() {
+        var filterDiv = document.getElementById("hiddenFilterDiv")
+        if (filterDiv.style.display === 'flex')
+            filterDiv.style.display = 'none'
+        else
+            filterDiv.style.display = 'flex'
+    }
+
+    function handleAddButtonClick() {
+        navigate("../add-new-song", { state: { user: location.state.user } });
+    }
+
+    return (
+        <>
+            <div class="filterDiv">
+                <div>
+                    Show&nbsp;
+                    <select
+                        value={pageSize}
+                        onChange={e => {
+                            setPageSize(Number(e.target.value))
+                        }}
+                    >
+                        {[5, 10, 15, 20].map(pageSize => (
+                            <option key={pageSize} value={pageSize}>{pageSize}
+                            </option>
+                        ))}
+                    </select>
+                    &nbsp;songs
+                </div>
+                <div>
+                    <button class="filtBtn" onClick={handleAddButtonClick}>
+                        <FaPlus />
+                    </button>
+                    <button class="filtBtn" onClick={handleFilterButtonClickRT}>
+                        <FaMicrophoneAlt />
+                    </button>
+                    <button class="filtBtn" onClick={handleFilterButtonClick}>
+                        <FaMusic />
+                    </button>
+                </div>
+            </div>
+            <table class="songTable" {...getTableProps()}>
+                <thead>
+                    {headerGroups.map(headerGroup => (
+                        <tr {...headerGroup.getHeaderGroupProps()}>
+                            {headerGroup.headers.map(column => (
+                                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                                    {column.render('Header')}
+                                    <span>
+                                        {column.isSorted
+                                            ? column.isSortedDesc
+                                                ? <FaArrowDown />
+                                                : <FaArrowUp />
+                                            : ''}
+                                    </span>
+                                </th>
+                            ))}
+                        </tr>
+                    ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                    {page.map(
+                        (row, i) => {
+                            prepareRow(row);
+                            return (
+                                <tr {...row.getRowProps()} onClick={() => {
+                                    console.log(row.original);
+                                    setOpenInfo(true);
+                                    fetch("https://localhost:5001/api/Song/" + row.original.id)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log("Giving song:");
+                                            console.log(data);
+                                            setSongId(data);
+                                        }).catch(function (error) {
+                                            console.log("ERROR FETCHING SONG");
+                                            console.log(error);
+                                        });
+                                }}>
+                                    {row.cells.map(cell => {
+                                        return (
+                                            <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                                        )
+                                    })}
+                                </tr>
+
+                            )
+                        }
+                    )}
+                    {openInfo && <InfoPopup openInfo={setOpenInfo} songId={songId} />}
+                </tbody>
+            </table>
+            <div className="pagination">
+                <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+                    {'Previous'}
+                </button>{' '}
+                <button onClick={() => nextPage()} disabled={!canNextPage}>
+                    {'Next'}
+                </button>{' '}
+            </div>
+        </>
+    )
+}
 
 const Home = () => {
 
+    const location = useLocation();
     const [songs, setSongs] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [filtSongs, setFiltSongs] = useState([])
+    const [helpfulSongs, setHelpfulSongs] = useState([])
+    const [namme, setNamme] = useState("");
+    const [songgName, setSonggName] = useState("");
+    const [categories, setCategories] = useState([]);
+
     const [buttonPopup, setButtonPopup] = useState(false);
 
-
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('http://localhost:5001/api/Song/user/' + 4).then(res => {
-            if (res.ok) {
-                return res.json()
-            } throw res;
-        }).then(data => {
-            setSongs(data);
-        }).catch(err => {
-            console.error("Err or fetching data: ", err);
-            setError(err);
-        }).finally(() => {
-            setLoading(false);
-        })
+        const fetchData = async () => {
+            const requestOptions = {
+                method: 'GET',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'same-origin'
+            };
+            const response = await fetch("https://localhost:5001/api/Song/user/" + location.state.user.id, requestOptions);
+            var data = await response.json()
+            setSongs(data)
+            setFiltSongs(data)
+            setHelpfulSongs(data)
+            const responseCategory = await fetch("https://localhost:5001/api/Category", requestOptions);
+            var dataCategory = await responseCategory.json()
+            setCategories(dataCategory)
+        }
+
+        fetchData().catch(console.error);
     }, [])
 
+    const columns = React.useMemo(
+        () => [
+            {
+                Header: 'Name',
+                accessor: 'name',
+
+            },
+            {
+                Header: 'Artist',
+                accessor: 'artist',
+            },
+            {
+                Header: 'Rating',
+                accessor: 'rating',
+            },
+            {
+                Header: <FaHeart />,
+                accessor: 'isFavourite',
+                Cell: props => {
+                    return props.value === true ? (
+                        <FaHeart />
+                    ) : (
+                        <FaRegHeart />
+                    );
+                }
+            },
+            {
+                Header: 'LastEdited',
+                accessor: 'lastEditedInApp',
+            },
+            {
+                Header: 'Category',
+                accessor: 'categoryName',
+            },
+
+        ],
+        []
+    )
+
+
+
+    function nameFilter(e) {
+        var name = e.target.value;
+        setNamme(name);
+        if (songgName !== "")
+            setFiltSongs(helpfulSongs.filter(x => x.name.toLowerCase().includes(name.toLowerCase())));
+        else {
+            setFiltSongs(songs.filter(x => x.name.toLowerCase().includes(name.toLowerCase())));
+            setHelpfulSongs(filtSongs);
+        }
+        clearFiltersFunction1();
+    }
+
+    function artistFilter(e) {
+        var artist = e.target.value;
+        setSonggName(artist);
+        if (namme !== "")
+            setFiltSongs(helpfulSongs.filter(x => x.artist.toLowerCase().includes(artist.toLowerCase())));
+        else {
+            setFiltSongs(songs.filter(x => x.artist.toLowerCase().includes(artist.toLowerCase())));
+            setHelpfulSongs(filtSongs)
+        }
+        clearFiltersFunction1();
+    }
+
+    function applyFiltersFunction() {
+        var list = songs;
+        var catIndex = document.getElementById("category").selectedIndex;
+        var cat = document.getElementById("category")[catIndex].value;
+        var name = document.getElementById("name").value;
+        var artist = document.getElementById("artist").value;
+        var isFavIndex = document.getElementById("favourite").selectedIndex;
+        var isFav = "";
+        switch (isFavIndex) {
+            case 1:
+                isFav = true;
+                break;
+            case 2:
+                isFav = false;
+                break;
+            default:
+                break;
+        }
+
+        console.log("this is list");
+        console.log(list);
+        console.log("This is category0");
+        console.log(cat);
+        if (!cat !== "") {
+            list = list.filter(x => x.categoryName.toLowerCase().includes(cat.toLowerCase()));
+        }
+        if (isFav !== "")
+            list = list.filter(x => x.isFavourite === isFav);
+        if (name !== "")
+            list = list.filter(x => x.name.toLowerCase().includes(name.toLowerCase()));
+        if (artist !== "")
+            list = list.filter(x => x.artist.toLowerCase().includes(artist.toLowerCase()));
+
+        console.log(list);
+        setFiltSongs(list);
+
+    }
+
+    function clearFiltersFunction() {
+        setFiltSongs(songs);
+        document.getElementById("name").value = "";
+        document.getElementById("artist").value = "";
+        document.getElementById("category").selectedIndex = 0;
+        document.getElementById("favourite").selectedIndex = 0;
+    }
+
+    function clearFiltersFunction1() {
+        document.getElementById("category").selectedIndex = 0;
+        document.getElementById("favourite").selectedIndex = 0;
+    }
+
+    const logout = async () => {
+        navigate("../", { replace: true });
+    }
+
     return (
-
-
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-10 mx-auto mb-4">
-                    <div class="section-title text-center ">
-                        <h3 class="top-c-sep">MyMusicApp</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-10 mx-auto">
-                    <div class="career-search mb-60">
-
-                        <form action="#" class="career-form mb-60">
-                            <div class="row">
-                                <div class="col-md-6 col-lg-3 my-3">
-                                    <div class="input-group position-relative">
-                                        <input type="text" class="form-control" placeholder="Enter Your Keywords" id="keywords" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-lg-3 my-3">
-                                    <div class="select-container">
-                                        <select class="custom-select">
-                                            <option selected="">Location</option>
-                                            <option value="1">Jaipur</option>
-                                            <option value="2">Pune</option>
-                                            <option value="3">Bangalore</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-lg-3 my-3">
-                                    <div class="select-container">
-                                        <select class="custom-select">
-                                            <option selected="">Select Job Type</option>
-                                            <option value="1">Ui designer</option>
-                                            <option value="2">JS developer</option>
-                                            <option value="3">Web developer</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-lg-3 my-3">
-                                    <button type="button" class="btn btn-lg btn-block btn-light btn-custom" id="contact-submit">
-                                        Search
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-
-                        <div class="filter-result">
-                            <p class="mb-30 ff-montserrat">Number of songs in app : {pjesme.length}</p>
-                            <table>
-                                <thead>
-                                    <tr className='no-hover'>
-                                        <th class="filterId">#</th>
-                                        <th class="filterTitle">Title</th>
-                                        <th class="filterArtist">Artist</th>
-                                        <th class="filterFav"><FaRegHeart /></th>
-                                        <th class="filterAdded">Added</th>
-                                        <th class="filterCat">Category</th>
-                                        <th class="filterDelete"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pjesme.map((item) => (
-                                        <tr key={item.id} onClick={() => setButtonPopup(true)}>
-                                            {Object.values(item).map((val) => (
-                                                <td>{val}</td>
-                                            ))}
-                                            <td><FaTrashAlt /></td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                                <InfoPopup trigger={buttonPopup} setTrigger={setButtonPopup}></InfoPopup>
-                            </table>
+        <Box class="container" sx={{
+            width: '70%',
+            padding: '20px',
+            height: '40%',
+            boxShadow: 16,
+            borderRadius: '0 0 20px 20px',
+            position: 'relative',
+            overflow: 'auto',
+            margin: 'auto'
+        }}>
+            <h1>My Music App</h1>
+            <button class="logout-btn" onClick={logout}><FaSignOutAlt /></button>
+            <div class="mainDiv">
+                <div class="mainFilterDiv">
+                    <div id="hiddenFilterDivRT">
+                        <div>
+                            <label for="name">Filter by name&nbsp;</label>
+                            <input type="text" name="name" id="name" onChange={nameFilter}></input>
+                        </div>
+                        <div>
+                            <label for="artist">Filter by artist&nbsp;</label>
+                            <input type="text" name="artist" id="artist" onChange={artistFilter}></input>
                         </div>
                     </div>
+                    <div id="hiddenFilterDiv">
+                        <div id="insideHiddenFilterDiv">
 
-                    <nav aria-label="Page navigation" class="page-nav">
-                        <ul class="pagination pagination-reset justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                    <FaAngleLeft />
-                                </a>
-                            </li>
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item d-none d-md-inline-block"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item d-none d-md-inline-block"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">...</a></li>
-                            <li class="page-item"><a class="page-link" href="#">8</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">
-                                    <FaAngleRight />
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                            <div>
+                                <label for="favourite">Favourite&nbsp;</label>
+                                <select id="favourite" class="fav-select">
+                                    <option></option>
+                                    <option>Favourite</option>
+                                    <option>Nonfavourite</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="category">Category&nbsp;</label>
+                                <select id="category">
+                                    <option></option>
+                                    {categories.map(x => <option>{x.categoryName}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div id="insideHiddenFilterDiv2">
+                            <button onClick={applyFiltersFunction}>
+                                {'Apply'}
+                            </button>
+                            <button onClick={clearFiltersFunction}>
+                                {'Clear'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                <Table columns={columns} data={filtSongs} />
             </div>
-
-        </div >
+        </Box>
     );
 }
 

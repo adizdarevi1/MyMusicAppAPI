@@ -14,7 +14,8 @@
     width: 100%;
     padding: 4rem 2rem;
     border-radius: .8rem;
-    background: linear-gradient(to right bottom, #4048bf, #409fbf);
+    background: #475d62 url(https://images.hdqwalls.com/wallpapers/music-melody-abstract-4k-jr.jpg);
+
     box-shadow: 0.4rem 0.4rem 2.4rem 0.2rem hsl(236deg 50% 50% / 30%);
     position: relative;
     overflow: hidden;
@@ -76,11 +77,7 @@
 }
 
 .modal__text {
-    padding: 0 4rem;
-    margin-bottom: 4rem;
-
-    font-size: 1.6rem;
-    line-height: 2;
+    font-style: italic;
 }
 
 .modal__text::before {
