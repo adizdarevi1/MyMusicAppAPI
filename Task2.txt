@@ -26,9 +26,6 @@ public class Foo
 		// firstly let's sort dictionary, it is more efficient to sort it once
 		reviewsRepository.Sort();
 		
-		// now let's take first two letters from input
-		string word = userInput.Substring(0,2);
-		
 		// now let's get into a loop while we take substrings of a word until we get the whole word
 		for(int i = 2; i < userInput.Length; i++){
 			// let's filter our dictionary to words starting with substring and add top 3 to the list of string lists
